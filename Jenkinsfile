@@ -2,8 +2,8 @@ pipeline {
     agent any
     
     tools {
-        maven 'Maven 3.8.6' // Nom configuré dans Jenkins Global Tool Configuration
-        jdk 'JDK 11'        // Nom configuré dans Jenkins Global Tool Configuration
+        maven 'Maven 3.8.6'
+        jdk 'JDK 11'
     }
     
     environment {
@@ -11,23 +11,23 @@ pipeline {
     }
 
     stages {
-        stage('🔍 Checkout') {
+        stage('Checkout') {
             steps {
-                echo '📥 Clonage du repository Git...'
+                echo 'Clonage du repository Git...'
                 checkout scm
             }
         }
         
-        stage('🔧 Build') {
+        stage('Build') {
             steps {
-                echo '🏗️ Compilation du projet avec Maven...'
+                echo 'Compilation du projet avec Maven...'
                 sh 'mvn clean compile'
             }
         }
         
-        stage('🧪 Test') {
+        stage('Test') {
             steps {
-                echo '✅ Exécution des tests unitaires...'
+                echo 'Execution des tests unitaires...'
                 sh 'mvn test'
             }
             post {
@@ -37,16 +37,16 @@ pipeline {
             }
         }
         
-        stage('📦 Package') {
+        stage('Package') {
             steps {
-                echo '📦 Génération du fichier JAR...'
+                echo 'Generation du fichier JAR...'
                 sh 'mvn package -DskipTests'
             }
         }
         
-        stage('📚 Archive') {
+        stage('Archive') {
             steps {
-                echo '💾 Archivage des artefacts...'
+                echo 'Archivage des artefacts...'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 archiveArtifacts artifacts: 'pom.xml', fingerprint: true
             }
@@ -55,14 +55,14 @@ pipeline {
     
     post {
         success {
-            echo '✅ Pipeline exécuté avec succès!'
-            echo "📦 Artefact généré: ${ARTIFACT_NAME}"
+            echo 'Pipeline execute avec succes!'
+            echo "Artefact genere: ${ARTIFACT_NAME}"
         }
         failure {
-            echo '❌ Le pipeline a échoué.'
+            echo 'Le pipeline a echoue.'
         }
         always {
-            echo '🧹 Nettoyage...'
+            echo 'Nettoyage...'
             cleanWs(deleteDirs: true)
         }
     }

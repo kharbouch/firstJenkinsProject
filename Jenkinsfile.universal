@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven 3.9.6'
+        jdk 'JDK 8'
+    }
+    
+    environment {
+        ARTIFACT_NAME = "first-jenkins-project-${BUILD_NUMBER}.jar"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Clonage du repository Git...'
+                git branch: 'main', url: 'https://github.com/kharbouch/firstJenkinsProject.git'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Compilation du projet avec Maven...'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean compile'
+                    } else {
+                        bat 'mvn clean compile'
+                    }
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Execution des tests unitaires...'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn test'
+                    } else {
+                        bat 'mvn test'
+                    }
+                }
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo 'Generation du fichier JAR...'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn package -DskipTests'
+                    } else {
+                        bat 'mvn package -DskipTests'
+                    }
+                }
+            }
+        }
+        
+        stage('Archive') {
+            steps {
+                echo 'Archivage des artefacts...'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'pom.xml', fingerprint: true
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline execute avec succes!'
+            echo "Artefact genere: ${ARTIFACT_NAME}"
+        }
+        failure {
+            echo 'Le pipeline a echoue.'
+        }
+        always {
+            echo 'Nettoyage...'
+            cleanWs(deleteDirs: true)
+        }
+    }
+}
